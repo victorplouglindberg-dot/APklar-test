@@ -11,6 +11,7 @@ import TaskRenderer from "../components/tasks/TaskRenderer";
 import { cn } from "../utils/cn";
 import SessionNav from "../components/SessionNav";
 import { CategoryIcon, ClockIcon, ExamIcon } from "../components/icons";
+import HhxExamPage from "./HhxExam";
 
 type Outcome = { ok: boolean; answer?: SavedAnswer } | null;
 
@@ -54,10 +55,28 @@ export default function ExamPage({
   const [byCategory, setByCategory] = useState<Record<string, CategoryStat>>({});
   const [pose, setPose] = useState<MascotPose>("explain");
   const [confirmAbort, setConfirmAbort] = useState(false);
+  // HHX eksamensprøve (øveprøve med ukendt tekst, 7 opgaver og 40 minutter).
+  // Kun på HHX: STX har andre eksamener, så denne del må ikke vises der.
+  const [hhxExamOpen, setHhxExamOpen] = useState(false);
   const reduceMotion = progress.settings.reduceMotion;
 
   const isHhx = education === "hhx";
   const theme = getEducation(education);
+  const categoryEntries = useMemo(() => Object.entries(byCategory), [byCategory]);
+
+  // Eksamensprøven har sit eget forløb (intro, prøve og bedømmelse) på en
+  // separat skærm, så den almene prøveoversigt er uændret.
+  if (isHhx && hhxExamOpen) {
+    return (
+      <HhxExamPage
+        education={education}
+        progress={progress}
+        onExit={() => setHhxExamOpen(false)}
+        onExamComplete={onExamComplete}
+      />
+    );
+  }
+
   // På HHX er der kun én prøve (hele HHX-pensum); på STX kan man vælge spor.
   const tracks = isHhx ? (["hhx"] as ExamTrack[]) : (Object.keys(TRACK_INFO) as ExamTrack[]);
 
@@ -66,7 +85,6 @@ export default function ExamPage({
   const maxCount = isUltimate ? poolSize : Math.min(28, poolSize);
   const minCount = isUltimate ? Math.min(50, poolSize) : Math.min(6, poolSize);
   const step = isUltimate ? 1 : 2;
-  const categoryEntries = useMemo(() => Object.entries(byCategory), [byCategory]);
 
   function startExam() {
     const generated = generateExam(track, count, education);
@@ -149,7 +167,26 @@ export default function ExamPage({
 
         <Mascot pose="explain" size="md" speech="Vælg selv sværhedsgrad og længde. Jeg samler spørgsmålene til dig!" reduceMotion={reduceMotion} />
 
+        {isHhx && (
+          <div className="overflow-hidden rounded-3xl border-2 border-blue-200 bg-gradient-to-r from-blue-500 to-indigo-600 p-5 text-white shadow-lg shadow-blue-500/20">
+            <p className="text-xs font-extrabold uppercase tracking-wide text-white/70">Eksamensprøve (øveprøve)</p>
+            <h2 className="font-display text-xl font-extrabold">Tag eksamensprøven i AP</h2>
+            <p className="mt-1 text-sm text-white/85">
+              Som til den interne prøve i uge 45: Træk en ukendt tekst, løs de 7 eksamensopgaver på 40 minutter og få en vejledende karakter med gennemgang af
+              alle opgaver.
+            </p>
+            <button
+              onClick={() => setHhxExamOpen(true)}
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-extrabold text-blue-700 shadow-md transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <ExamIcon className="h-4 w-4" />
+              Tag eksamensprøve
+            </button>
+          </div>
+        )}
+
         <div className="space-y-3">
+          <p className={cn("text-sm font-bold", isHhx ? "text-ink/70" : "text-ink")}>{isHhx ? "Eller vælg en kort prøve:" : "Vælg spor:"}</p>
           {tracks.map((t) => (
             <button
               key={t}

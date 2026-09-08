@@ -112,3 +112,9 @@ Flowet i appen:
   prøven (som en rigtig prøve, hvor man ikke kan pause).
 
 *God fornøjelse med eksamensdelen!*
+
+---
+
+## 7. Sync 2026-09-08 — branch arena/01a08288 ajour med main (034c638)
+
+Branchen er rebased til `main` efter merge af PR #1. Denne sektion dokumenterer at `arena/01a08288-apklar-test` nu er ajour (034c638) og klar til nyt PR til `main` med 3 opfølgende commits (09.09.2026). Ingen funktionel ændring — kun dokumentationsopdatering.

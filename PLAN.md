@@ -2,6 +2,8 @@
 
 *Dato: 10. august 2026 — status: planlægningsfase, klar til godkendelse*
 
+> **Sync 2026-09-08:** Branch `arena/01a08288-apklar-test` ajourført med `main` (034c638) og klar til PR med 3 commits — ingen funktionelle ændringer.
+
 ---
 
 ## 1. Vigtig afklaring først: HHX eller HTX?

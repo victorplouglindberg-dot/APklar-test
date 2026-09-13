@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  Fragment,
   type CSSProperties,
   type ReactNode,
 } from "react";
@@ -150,7 +151,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
-          className="w-full rounded-xl border-2 border-ink/15 bg-white px-3.5 py-2.5 text-[15px] text-ink outline-none transition focus:border-blue-500"
+          className="w-full rounded-xl border-2 border-ink/15 bg-white px-3.5 py-2.5 text-base text-ink outline-none transition focus:border-blue-500"
         />
       ) : (
         <input
@@ -160,7 +161,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           autoComplete="off"
-          className="w-full rounded-xl border-2 border-ink/15 bg-white px-3.5 py-2.5 text-[15px] text-ink outline-none transition focus:border-blue-500"
+          className="w-full rounded-xl border-2 border-ink/15 bg-white px-3.5 py-2.5 text-base text-ink outline-none transition focus:border-blue-500"
         />
       )}
     </div>
@@ -417,6 +418,12 @@ function formatTime(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function isArticleHeading(paragraph: string): boolean {
+  const trimmed = paragraph.trim();
+  const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
+  return wordCount <= 6 && !/[.!?,:;]$/.test(trimmed);
 }
 
 // -------------------------------------------------------------------------
@@ -908,7 +915,7 @@ export default function HhxExamPage({
       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="app-page space-y-6"
+      className="app-page-narrow space-y-6"
     >
       {/* Timer: matcher forberedelsestiden på 40 minutter */}
       <div className="sticky top-0 z-30 -mx-4 -mt-2 border-b border-ink/10 bg-white/95 px-4 py-2.5 backdrop-blur-md">
@@ -949,22 +956,29 @@ export default function HhxExamPage({
       {/* Teksten med markeringer */}
       <div
         ref={textRef}
-        className="space-y-3 rounded-3xl border border-ink/10 bg-white p-5 text-[15px] leading-[1.9] text-ink/90 shadow-sm"
+        className="mx-auto max-w-[42rem] space-y-3 rounded-3xl border border-ink/10 bg-white p-6 font-serif text-base leading-[1.85] text-ink/90 shadow-sm sm:p-7"
         lang="da"
       >
-        {tokensByPara.map((toks, pi) => (
-          <p key={pi}>
-            {toks.map((word, ti) => {
-              const id = `${pi}:${ti}`;
-              return (
-                <span key={ti} data-tok={id} className={tokenClass(id)}>
-                  {word}
-                  {tokenGlyph(id)}
-                </span>
-              );
-            })}
-          </p>
-        ))}
+        {tokensByPara.map((toks, pi) => {
+          const paragraph = text.paragraphs[pi];
+          const heading = isArticleHeading(paragraph);
+          return (
+            <p key={pi} className={heading ? "pt-2 font-sans text-sm font-extrabold uppercase tracking-wide text-ink/70" : undefined}>
+              {toks.map((word, ti) => {
+                const id = `${pi}:${ti}`;
+                return (
+                  <Fragment key={ti}>
+                    <span data-tok={id} className={tokenClass(id)}>
+                      {word}
+                      {tokenGlyph(id)}
+                    </span>
+                    {ti < toks.length - 1 ? " " : null}
+                  </Fragment>
+                );
+              })}
+            </p>
+          );
+        })}
       </div>
 
       {/* Markeringværktøjer: tusch, sætningsled og ordklasser */}
@@ -1350,7 +1364,7 @@ export default function HhxExamPage({
               value={copyFallback}
               rows={10}
               onFocus={(e) => e.currentTarget.select()}
-              className="w-full rounded-xl border-2 border-ink/15 bg-ink/[0.03] px-3 py-2.5 text-[13px] text-ink"
+              className="w-full rounded-xl border-2 border-ink/15 bg-ink/[0.03] px-3 py-2.5 text-base text-ink"
             />
             <div className="flex gap-2">
               <button onClick={() => setCopyFallback(null)} className="flex-1 rounded-full border-2 border-ink/15 py-2.5 text-sm font-semibold text-ink">
